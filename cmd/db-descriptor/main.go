@@ -1,14 +1,12 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/PDCMFinder/db-descriptor/internal/extractor"
 	"github.com/PDCMFinder/db-descriptor/pkg/connector"
 	"github.com/PDCMFinder/db-descriptor/pkg/report"
+	"github.com/PDCMFinder/db-descriptor/pkg/service"
 	"github.com/urfave/cli/v2"
 )
 
@@ -103,25 +101,7 @@ func main() {
 }
 
 func RunDBDescriptor(input connector.Input, outputFileName string) error {
-	dbConnector, err := getDBConnector(input)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(dbConnector)
-	dbDescriptionExtractor := extractor.New(dbConnector)
-	databaseDescription := dbDescriptionExtractor.ExtractDescription()
+	databaseDescription := service.GetDbDescription(input)
 	report.WriteDbDescriptionAsJson(databaseDescription, outputFileName)
 	return nil
-}
-
-func getDBConnector(input connector.Input) (connector.DBConnector, error) {
-	var dbConnector connector.DBConnector
-	switch input.Db {
-	case "postgres":
-		dbConnector = connector.PostgresDBConnector{Input: input}
-	default:
-		return nil, errors.New(fmt.Sprintf("Database type [%s] not supported.", input.Db))
-	}
-
-	return dbConnector, nil
 }
