@@ -1,3 +1,4 @@
+// Package service contains the entry point of the logic to retrieve descriptions from a database.
 package service
 
 import (
@@ -10,7 +11,7 @@ import (
 	"github.com/PDCMFinder/db-descriptor/pkg/model"
 )
 
-// Returns a `model.DatabaseDescription` object with the description of a database
+// Returns a `model.DatabaseDescription` object with the description of a database.
 func GetDbDescription(input connector.Input) model.DatabaseDescription {
 	dbConnector, err := getDBConnector(input)
 	if err != nil {
@@ -21,6 +22,8 @@ func GetDbDescription(input connector.Input) model.DatabaseDescription {
 	return databaseDescription
 }
 
+// Helper function to get the appropiate DBConnector implementation. Really simple logic as only one DBConnector
+// is implemented. This could be much more sophisticated, following a plugin-like approach.
 func getDBConnector(input connector.Input) (connector.DBConnector, error) {
 	var dbConnector connector.DBConnector
 	switch input.Db {

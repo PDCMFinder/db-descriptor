@@ -1,3 +1,4 @@
+// Package extractor contains the logic to extract descriptions from a database.
 package extractor
 
 import (
@@ -11,10 +12,16 @@ import (
 	"github.com/PDCMFinder/db-descriptor/pkg/model"
 )
 
+/*
+A struct to hold a [connector/DBConnector] and use it to query the database.
+
+Tje `dBConnector` property is a implementation of [connector/DBConnector], specific to a database type (like postgres).
+*/
 type dbDescriptionExtractor struct {
 	dBConnector connector.DBConnector
 }
 
+// Returns an instance of [dbDescriptionExtractor] after initializing it with a [connector/DBConnector].
 func New(dBConnector connector.DBConnector) dbDescriptionExtractor {
 	instance := dbDescriptionExtractor{dBConnector}
 	return instance

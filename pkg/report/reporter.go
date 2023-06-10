@@ -1,3 +1,5 @@
+// Package report contains logic to report the descriptions of a database.
+// For now, a service to write a JSON file with the database descritions is provided.
 package report
 
 import (
@@ -9,6 +11,7 @@ import (
 	"github.com/PDCMFinder/db-descriptor/pkg/model"
 )
 
+// Writes a [model/DatabaseDescription] struct as a JSOn file .
 func WriteDbDescriptionAsJson(databaseDescription model.DatabaseDescription, outputFileName string) {
 	jsonData, err := json.MarshalIndent(databaseDescription, "", "    ")
 	if err != nil {

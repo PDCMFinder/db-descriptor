@@ -1,3 +1,25 @@
+/*
+db-descriptor analyses a list of schemas in a database and creates a JSON file with information about its tables, views and columns.
+USAGE:
+
+	database descriptor [global options] command [command options] [arguments...]
+
+COMMANDS:
+
+	help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+
+	--host value, -H value                                   database host (default: "localhost")
+	--port value, -P value                                   database port (default: 8080)
+	--user value, -u value                                   database user (default: "admin")
+	--password value, -p value                               database password (default: "password")
+	--name value, -n value                                   database name (default: "test")
+	--schemas value, -s value [ --schemas value, -s value ]  comma separated list of schemas to describe (default: "public")
+	--dbtype value, --dt value                               specify the database type (default: "postgres")
+	--output value, -o value                                 JSON output file name the description of the database (default: "output.json")
+	--help, -h                                               show help
+*/
 package main
 
 import (

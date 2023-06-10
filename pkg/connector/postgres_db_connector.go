@@ -8,6 +8,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
+/*
+A Postgres implementation of [DBConnector].
+
+Implement methods to connect to a postgres database and obtain information about its tables, views, and columns.
+*/
 type PostgresDBConnector struct {
 	Input Input
 }
@@ -41,7 +46,7 @@ func (dbConnector PostgresDBConnector) GetEntitiesQueryStatement() string {
     FROM 
 		information_schema.tables WHERE table_schema in ([SCHEMAS])`
 
-	query := strings.Replace(queryTemplate, "[SCHEMAS]", GetFormattedSchemaList(dbConnector.Input.Schemas), -1)
+	query := strings.Replace(queryTemplate, "[SCHEMAS]", getFormattedSchemaList(dbConnector.Input.Schemas), -1)
 	return query
 }
 
@@ -57,6 +62,6 @@ func (dbConnector PostgresDBConnector) GetColumnsQueryStatement() string {
 		information_schema.columns isc WHERE table_schema in ([SCHEMAS])
 		order by isc.table_name,isc.column_name`
 
-	query := strings.Replace(queryTemplate, "[SCHEMAS]", GetFormattedSchemaList(dbConnector.Input.Schemas), -1)
+	query := strings.Replace(queryTemplate, "[SCHEMAS]", getFormattedSchemaList(dbConnector.Input.Schemas), -1)
 	return query
 }
