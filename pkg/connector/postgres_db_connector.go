@@ -44,7 +44,8 @@ func (dbConnector PostgresDBConnector) GetEntitiesQueryStatement() string {
 		('"' || table_schema || '"."' || table_name || '"')::regclass,
 		'pg_class'), '') AS comment
     FROM 
-		information_schema.tables WHERE table_schema in ([SCHEMAS])`
+		information_schema.tables WHERE table_schema in ([SCHEMAS])
+		ORDER BY table_name`
 
 	query := strings.Replace(queryTemplate, "[SCHEMAS]", getFormattedSchemaList(dbConnector.Input.Schemas), -1)
 	return query
