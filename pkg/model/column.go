@@ -7,9 +7,11 @@ Column contains data that can be extracted from the database. Main data is the n
 be able to identify the Entity it belongs to.
 */
 type Column struct {
-	SchemaName string
-	EntityName string
-	Name       string
-	DataType   string
-	Comment    string
+	SchemaName   string
+	EntityName   string
+	Name         string
+	DataType     string
+	Comment      string
+	IsPrimaryKey bool
+	IsForeignKey bool
 }

@@ -144,9 +144,12 @@ func processColumnRows(rows *sql.Rows) []model.Column {
 		var entity_name string
 		var column_name string
 		var data_type string
-		var column_comment string
+		var column_comment sql.NullString
+		var is_primary_key sql.NullBool
+		var is_foreign_key sql.NullBool
 
-		err := rows.Scan(&entity_schema, &entity_name, &column_name, &data_type, &column_comment)
+		err := rows.Scan(
+			&entity_schema, &entity_name, &column_name, &data_type, &column_comment, &is_primary_key, &is_foreign_key)
 		if err != nil {
 			panic(err)
 		}
@@ -155,14 +158,29 @@ func processColumnRows(rows *sql.Rows) []model.Column {
 		entityName := strings.ToLower(entity_name)
 		columnName := strings.ToLower(column_name)
 		dataType := data_type
-		columnComment := column_comment
 
+		var columnComment string
+		if column_comment.Valid {
+			columnComment = column_comment.String
+		}
+
+		var isPrimaryKey bool
+		if is_primary_key.Valid {
+			isPrimaryKey = is_primary_key.Bool
+		}
+
+		var isForeignKey bool
+		if is_foreign_key.Valid {
+			isForeignKey = is_foreign_key.Bool
+		}
 		var column model.Column = model.Column{
-			SchemaName: schemaName,
-			EntityName: entityName,
-			Name:       columnName,
-			DataType:   dataType,
-			Comment:    columnComment}
+			SchemaName:   schemaName,
+			EntityName:   entityName,
+			Name:         columnName,
+			DataType:     dataType,
+			Comment:      columnComment,
+			IsPrimaryKey: isPrimaryKey,
+			IsForeignKey: isForeignKey}
 
 		columns = append(columns, column)
 	}

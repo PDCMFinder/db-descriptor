@@ -52,15 +52,30 @@ func (dbConnector PostgresDBConnector) GetEntitiesQueryStatement() string {
 
 func (dbConnector PostgresDBConnector) GetColumnsQueryStatement() string {
 	queryTemplate :=
-		`SELECT 
-		isc.table_schema,
-		isc.table_name,
-		isc.column_name,
-		isc.data_type,
-		COALESCE(pg_catalog.col_description(format('%s.%s',isc.table_schema,isc.table_name)::regclass::oid,isc.ordinal_position),'') as column_description
+		`SELECT
+		ns.nspname AS schema_name,
+		tbl.relname AS table_name,
+		col.attname AS column_name,
+		format_type(col.atttypid, col.atttypmod) AS column_type,
+		col_description(tbl.oid, col.attnum) AS column_comment,
+		(SELECT CASE WHEN con.conname IS NULL THEN FALSE ELSE TRUE END
+		 FROM pg_constraint con
+		 WHERE con.contype = 'p' AND con.conrelid = tbl.oid AND col.attnum = ANY(con.conkey)) AS is_primary_key,
+		(SELECT CASE WHEN con.conname IS NULL THEN FALSE ELSE TRUE END
+		 FROM pg_constraint con
+		 WHERE con.contype = 'f' AND con.conrelid = tbl.oid AND col.attnum = ANY(con.conkey)) AS is_foreign_key
 	FROM
-		information_schema.columns isc WHERE table_schema in ([SCHEMAS])
-		order by isc.table_name,isc.column_name`
+		pg_namespace ns
+		JOIN pg_class tbl ON tbl.relnamespace = ns.oid
+		JOIN pg_attribute col ON col.attrelid = tbl.oid
+	WHERE
+		ns.nspname in ([SCHEMAS])
+		AND tbl.relkind IN ('r', 'v')
+		AND col.attnum > 0 -- Exclude system columns
+	ORDER BY
+		schema_name,
+		table_name,
+		col.attnum;`
 
 	query := strings.Replace(queryTemplate, "[SCHEMAS]", getFormattedSchemaList(dbConnector.Input.Schemas), -1)
 	return query
