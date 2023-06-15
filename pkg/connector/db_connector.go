@@ -34,4 +34,16 @@ type DBConnector interface {
 
 	*/
 	GetColumnsQueryStatement() string
+	/*
+		A SQL query that brings relations between entities (FKs). Implementations are expected to provide the following columns:
+		- table_schema 			(Schema of the entity)
+		- table_name   			(Entity name)
+		- column_name  			(The name of the column)
+		- constraint_name   	(The name of the fk)
+		- foreign_table_schema	(The name of the schema of the referenced table)
+		- foreign_table_name	(The name of the referenced table)
+		- foreign_column_name	(The name of the pk column in the referenced table)
+
+	*/
+	GetRelationsQueryStatement() string
 }

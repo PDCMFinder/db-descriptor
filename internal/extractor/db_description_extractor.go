@@ -41,6 +41,8 @@ func (d dbDescriptionExtractor) ExtractDescription() model.DatabaseDescription {
 	populateEntities(dataMap, d.dBConnector.GetEntitiesQueryStatement(), db)
 	// Add descriptions of columns
 	populateColumns(dataMap, d.dBConnector.GetColumnsQueryStatement(), db)
+	// Add relations
+	populateRelations(dataMap, d.dBConnector.GetRelationsQueryStatement(), db)
 
 	defer db.Close()
 
@@ -79,6 +81,22 @@ func populateColumns(dataMap map[string]map[string]model.Entity, queryStatement 
 	}
 }
 
+func populateRelations(dataMap map[string]map[string]model.Entity, queryStatement string, db *sql.DB) {
+	relations, err := getRelationsList(queryStatement, db)
+	if err == nil {
+		for _, r := range relations {
+			// The entity should exists already. If not, maybe an error could be thrown
+			entity, entityExists := dataMap[r.SchemaName][r.EntityName]
+			if entityExists {
+				entity.Relations = append(entity.Relations, r)
+				dataMap[r.SchemaName][r.EntityName] = entity
+				fmt.Println("added", r.RelationName, "from", r.EntityName)
+				fmt.Println(entity.Relations)
+			}
+		}
+	}
+}
+
 // Executes the query to retrieve the entities and converts it to a list of `model.Entity`
 func getEntitiesList(queryStatement string, db *sql.DB) ([]model.Entity, error) {
 	rows, err := db.Query(queryStatement)
@@ -94,6 +112,15 @@ func getColumnsList(queryStatement string, db *sql.DB) ([]model.Column, error) {
 	rows, err := db.Query(queryStatement)
 	if err == nil {
 		return processColumnRows(rows), nil
+	} else {
+		return nil, err
+	}
+}
+
+func getRelationsList(queryStatement string, db *sql.DB) ([]model.Relation, error) {
+	rows, err := db.Query(queryStatement)
+	if err == nil {
+		return processRelationsRows(rows), nil
 	} else {
 		return nil, err
 	}
@@ -186,6 +213,52 @@ func processColumnRows(rows *sql.Rows) []model.Column {
 	}
 
 	return columns
+}
+
+func processRelationsRows(rows *sql.Rows) []model.Relation {
+	relations := make([]model.Relation, 0)
+	for rows.Next() {
+		var entity_schema string
+		var constraint_name string
+		var entity_name string
+		var column_name string
+		var foreign_table_schema string
+		var foreign_table_name string
+		var foreign_column_name string
+
+		err := rows.Scan(
+			&entity_schema,
+			&constraint_name,
+			&entity_name,
+			&column_name,
+			&foreign_table_schema,
+			&foreign_table_name,
+			&foreign_column_name)
+		if err != nil {
+			panic(err)
+		}
+
+		schemaName := strings.ToLower(entity_schema)
+		constraintName := strings.ToLower(constraint_name)
+		entityName := strings.ToLower(entity_name)
+		columnName := strings.ToLower(column_name)
+		foreignEntitySchema := foreign_table_schema
+		foreignEntityname := foreign_table_name
+		foreignColumnName := foreign_column_name
+
+		var relation model.Relation = model.Relation{
+			SchemaName:          schemaName,
+			EntityName:          entityName,
+			RelationName:        constraintName,
+			ColumnName:          columnName,
+			ForeignEntitySchema: foreignEntitySchema,
+			ForeignEntityName:   foreignEntityname,
+			ForeignColumnName:   foreignColumnName}
+
+		relations = append(relations, relation)
+	}
+
+	return relations
 }
 
 func buildSchemeList(dataMap map[string]map[string]model.Entity) []model.Schema {

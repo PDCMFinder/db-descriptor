@@ -13,6 +13,7 @@ type Entity struct {
 	Name       string
 	EntityType string
 	Columns    []Column
+	Relations  []Relation
 	Comment    string
 }
 
