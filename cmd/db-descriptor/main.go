@@ -2,7 +2,7 @@
 db-descriptor analyses a list of schemas in a database and creates a JSON file with information about its tables, views and columns.
 USAGE:
 
-	database descriptor [global options] command [command options] [arguments...]
+	db-descriptor [global options] command [command options] [arguments...]
 
 COMMANDS:
 
@@ -43,7 +43,7 @@ func main() {
 	var output string
 
 	app := &cli.App{
-		Name:  "database descriptor",
+		Name:  "db-descriptor",
 		Usage: "describes a database",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
