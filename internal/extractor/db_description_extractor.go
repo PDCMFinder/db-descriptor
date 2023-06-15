@@ -90,8 +90,6 @@ func populateRelations(dataMap map[string]map[string]model.Entity, queryStatemen
 			if entityExists {
 				entity.Relations = append(entity.Relations, r)
 				dataMap[r.SchemaName][r.EntityName] = entity
-				fmt.Println("added", r.RelationName, "from", r.EntityName)
-				fmt.Println(entity.Relations)
 			}
 		}
 	}
